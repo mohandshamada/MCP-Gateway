@@ -297,7 +297,63 @@ curl -H "Authorization: Bearer $TOKEN" https://your-domain.com/admin/client-conf
 
 ## Caddy Reverse Proxy Setup
 
-### Automatic Setup
+### Robust Setup (Recommended)
+
+Use the comprehensive Caddy integration script for production deployments:
+
+```bash
+sudo ./scripts/caddy-integration.sh
+```
+
+This script provides:
+- **Automatic installation** - Installs Caddy if not present
+- **Configuration detection** - Reads MCP Gateway settings automatically
+- **Dynamic Caddyfile generation** - Optimized for SSE, RPC, and Message endpoints
+- **Validation** - Tests configuration before applying
+- **Health checks** - Verifies gateway connectivity
+- **Testing suite** - Runs integration tests after setup
+- **Error recovery** - Attempts to fix common issues automatically
+
+#### Available Commands
+
+```bash
+# Interactive setup (default)
+sudo ./scripts/caddy-integration.sh
+
+# Check current status
+sudo ./scripts/caddy-integration.sh --check
+
+# Run integration tests
+sudo ./scripts/caddy-integration.sh --test
+
+# Fix common issues automatically
+sudo ./scripts/caddy-integration.sh --fix
+
+# Generate setup report
+sudo ./scripts/caddy-integration.sh --report
+
+# Non-interactive setup (for automation)
+sudo MCP_DOMAIN=mcp.example.com ./scripts/caddy-integration.sh --non-interactive
+
+# Remove configuration (keeps Caddy installed)
+sudo ./scripts/caddy-integration.sh --uninstall
+```
+
+#### Environment Variables
+
+For automated/CI deployments:
+
+```bash
+export MCP_DOMAIN=mcp.example.com        # Required
+export MCP_SSL_EMAIL=admin@example.com   # Optional
+export MCP_API_TOKEN=sk-xxxxx            # Optional
+export MCP_GATEWAY_HOST=127.0.0.1        # Optional, auto-detected
+export MCP_GATEWAY_PORT=3000             # Optional, auto-detected
+```
+
+### Quick Setup (Legacy)
+
+For simpler setups with OAuth configuration:
 
 ```bash
 sudo ./scripts/setup-caddy.sh
@@ -315,9 +371,9 @@ Create `/etc/caddy/Caddyfile`:
 
 ```
 your-domain.com {
-    # SSE endpoint needs special handling
+    # SSE endpoint needs special handling for long-lived connections
     handle /sse* {
-        reverse_proxy localhost:3000 {
+        reverse_proxy 127.0.0.1:3000 {
             transport http {
                 read_timeout 0
                 write_timeout 0
@@ -328,7 +384,7 @@ your-domain.com {
 
     # All other endpoints
     handle {
-        reverse_proxy localhost:3000
+        reverse_proxy 127.0.0.1:3000
     }
 }
 ```
@@ -736,6 +792,10 @@ mcp-gateway/
 │   ├── sse-client-config.json
 │   └── test-connection.sh
 ├── dist/                     # Compiled JavaScript
+├── logs/                     # Application logs
+│   └── caddy-setup.log       # Caddy integration logs
+├── backups/                  # Configuration backups
+│   └── caddy/                # Caddyfile backups
 ├── mcp-data/                 # MCP tool data (777 permissions)
 │   ├── data/
 │   ├── cache/
@@ -746,7 +806,9 @@ mcp-gateway/
 ├── node_modules/             # Includes all MCP servers
 ├── scripts/
 │   ├── setup-ubuntu.sh       # Basic setup script
-│   └── setup-caddy.sh        # Caddy + Domain + OAuth setup
+│   ├── setup-caddy.sh        # Caddy + Domain + OAuth setup
+│   └── caddy-integration.sh  # Robust Caddy integration (recommended)
+├── start-gateway.sh          # Start script (created for non-systemd)
 └── src/                      # TypeScript source
 ```
 
