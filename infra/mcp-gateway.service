@@ -1,0 +1,59 @@
+[Unit]
+Description=MCP Gateway - Federated MCP Server Aggregation Service
+Documentation=https://github.com/your-org/mcp-gateway
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=mcpgateway
+Group=mcpgateway
+
+# Working directory
+WorkingDirectory=/opt/mcp-gateway
+
+# Environment
+Environment=NODE_ENV=production
+Environment=LOG_LEVEL=info
+Environment=CONFIG_PATH=/opt/mcp-gateway/config/gateway.json
+
+# Load additional environment variables from file
+EnvironmentFile=-/opt/mcp-gateway/config/secrets.env
+
+# Start command
+ExecStart=/usr/bin/node /opt/mcp-gateway/dist/index.js
+
+# Restart policy
+Restart=always
+RestartSec=10
+StartLimitBurst=5
+StartLimitIntervalSec=60
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/mcp-gateway/logs
+
+# Network isolation - only allow localhost
+# Uncomment if you want to restrict network access
+# PrivateNetwork=true
+# RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+
+# Standard output/error logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=mcp-gateway
+
+# Graceful shutdown
+TimeoutStopSec=30
+KillMode=mixed
+KillSignal=SIGTERM
+
+[Install]
+WantedBy=multi-user.target

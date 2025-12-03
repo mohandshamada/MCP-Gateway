@@ -1,0 +1,103 @@
+{
+  "gateway": {
+    "host": "0.0.0.0",
+    "port": 3000,
+    "name": "MCP Gateway",
+    "version": "1.0.0"
+  },
+  "domain": {
+    "domain": null,
+    "publicUrl": null,
+    "ssl": {
+      "enabled": false,
+      "email": null
+    },
+    "proxy": {
+      "enabled": false,
+      "type": "caddy"
+    }
+  },
+  "auth": {
+    "enabled": true,
+    "tokens": ["test-token-12345"],
+    "oauth": {
+      "enabled": false
+    }
+  },
+  "servers": [
+    {
+      "id": "filesystem",
+      "transport": "stdio",
+      "command": "node",
+      "args": ["node_modules/@modelcontextprotocol/server-filesystem/dist/index.js", "/home", "/tmp", "/var", "/root"],
+      "enabled": true,
+      "lazyLoad": false,
+      "timeout": 60000,
+      "maxRetries": 3,
+      "env": {}
+    },
+    {
+      "id": "memory",
+      "transport": "stdio",
+      "command": "node",
+      "args": ["node_modules/@modelcontextprotocol/server-memory/dist/index.js"],
+      "enabled": true,
+      "lazyLoad": false,
+      "timeout": 60000,
+      "maxRetries": 3,
+      "env": {}
+    },
+    {
+      "id": "sequential-thinking",
+      "transport": "stdio",
+      "command": "node",
+      "args": ["node_modules/@modelcontextprotocol/server-sequential-thinking/dist/index.js"],
+      "enabled": true,
+      "lazyLoad": false,
+      "timeout": 60000,
+      "maxRetries": 3,
+      "env": {}
+    },
+    {
+      "id": "desktop-commander",
+      "transport": "stdio",
+      "command": "node",
+      "args": ["node_modules/@wonderwhy-er/desktop-commander/dist/index.js"],
+      "enabled": true,
+      "lazyLoad": false,
+      "timeout": 60000,
+      "maxRetries": 3,
+      "env": {
+        "ALLOWED_PATHS": "/home,/tmp,/var,/root",
+        "ENABLE_FILE_OPERATIONS": "true",
+        "ENABLE_TERMINAL": "true"
+      }
+    },
+    {
+      "id": "playwright",
+      "transport": "stdio",
+      "command": "node",
+      "args": ["node_modules/@playwright/mcp/cli.js"],
+      "enabled": true,
+      "lazyLoad": false,
+      "timeout": 120000,
+      "maxRetries": 3,
+      "env": {
+        "HEADLESS": "true",
+        "BROWSER": "chromium",
+        "SCREENSHOTS_DIR": "./mcp-data/screenshots"
+      }
+    }
+  ],
+  "settings": {
+    "requestTimeout": 120000,
+    "enableHealthChecks": true,
+    "healthCheckInterval": 30000,
+    "enableHotReload": true,
+    "enableRateLimiting": true,
+    "rateLimit": {
+      "windowMs": 60000,
+      "maxRequests": 200
+    }
+  }
+}

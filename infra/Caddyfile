@@ -1,0 +1,92 @@
+# Caddyfile for MCP Gateway
+# Handles automatic HTTPS via Let's Encrypt and reverse proxy to the Node.js application
+
+# Replace mcp.yourdomain.com with your actual domain
+mcp.yourdomain.com {
+    # Automatic HTTPS is enabled by default in Caddy
+    # Caddy will automatically obtain and renew SSL certificates from Let's Encrypt
+
+    # Reverse proxy to the local MCP Gateway
+    reverse_proxy 127.0.0.1:3000 {
+        # Enable streaming for SSE connections
+        flush_interval -1
+
+        # Health checking
+        health_uri /admin/health
+        health_interval 30s
+        health_timeout 10s
+        health_status 200
+
+        # Headers
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+
+    # Security headers
+    header {
+        # Prevent clickjacking
+        X-Frame-Options "DENY"
+        # XSS protection
+        X-XSS-Protection "1; mode=block"
+        # Prevent MIME type sniffing
+        X-Content-Type-Options "nosniff"
+        # Referrer policy
+        Referrer-Policy "strict-origin-when-cross-origin"
+        # Remove server header
+        -Server
+    }
+
+    # Rate limiting (optional - uncomment to enable)
+    # rate_limit {
+    #     zone mcp_zone {
+    #         key {remote_host}
+    #         events 100
+    #         window 1m
+    #     }
+    # }
+
+    # Logging
+    log {
+        output file /var/log/caddy/mcp-gateway.log {
+            roll_size 10mb
+            roll_keep 5
+            roll_keep_for 720h
+        }
+        format json
+        level INFO
+    }
+
+    # Error handling
+    handle_errors {
+        respond "{err.status_code} {err.status_text}"
+    }
+}
+
+# Optional: Redirect HTTP to HTTPS
+http://mcp.yourdomain.com {
+    redir https://{host}{uri} permanent
+}
+
+# Optional: Admin-only subdomain with stricter access
+# admin.mcp.yourdomain.com {
+#     # Only allow admin endpoints
+#     @admin {
+#         path /admin/*
+#     }
+#     
+#     # Allow from specific IPs only
+#     @allowed {
+#         remote_ip 10.0.0.0/8 192.168.0.0/16 YOUR_OFFICE_IP
+#     }
+#     
+#     handle @admin {
+#         handle @allowed {
+#             reverse_proxy 127.0.0.1:3000
+#         }
+#         respond "Forbidden" 403
+#     }
+#     
+#     respond "Not Found" 404
+# }

@@ -1,0 +1,69 @@
+{
+  "gateway": {
+    "host": "127.0.0.1",
+    "port": 3000,
+    "name": "MCP Gateway",
+    "version": "1.0.0"
+  },
+  "auth": {
+    "enabled": true,
+    "tokens": []
+  },
+  "servers": [
+    {
+      "id": "memory",
+      "transport": "stdio",
+      "command": "node",
+      "args": ["/opt/mcp-gateway/node_modules/@modelcontextprotocol/server-memory/dist/index.js"],
+      "enabled": true,
+      "lazyLoad": false,
+      "timeout": 60000,
+      "maxRetries": 3
+    },
+    {
+      "id": "filesystem",
+      "transport": "stdio",
+      "command": "node",
+      "args": ["/opt/mcp-gateway/node_modules/@modelcontextprotocol/server-filesystem/dist/index.js", "/home"],
+      "enabled": true,
+      "lazyLoad": false,
+      "timeout": 60000,
+      "maxRetries": 3
+    },
+    {
+      "id": "github",
+      "transport": "stdio",
+      "command": "node",
+      "args": ["/opt/mcp-gateway/node_modules/@modelcontextprotocol/server-github/dist/index.js"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      },
+      "enabled": false,
+      "lazyLoad": true,
+      "timeout": 60000,
+      "maxRetries": 3
+    },
+    {
+      "id": "fetch",
+      "transport": "stdio",
+      "command": "node",
+      "args": ["/opt/mcp-gateway/node_modules/@modelcontextprotocol/server-fetch/dist/index.js"],
+      "enabled": true,
+      "lazyLoad": true,
+      "timeout": 60000,
+      "maxRetries": 3
+    }
+  ],
+  "settings": {
+    "requestTimeout": 60000,
+    "enableHealthChecks": true,
+    "healthCheckInterval": 30000,
+    "enableHotReload": true,
+    "sessionTimeout": 3600000,
+    "enableRateLimiting": true,
+    "rateLimit": {
+      "windowMs": 60000,
+      "maxRequests": 100
+    }
+  }
+}

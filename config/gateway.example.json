@@ -1,0 +1,75 @@
+{
+  "gateway": {
+    "host": "127.0.0.1",
+    "port": 3000,
+    "name": "MCP Gateway",
+    "version": "1.0.0"
+  },
+  "auth": {
+    "enabled": true,
+    "tokens": []
+  },
+  "servers": [
+    {
+      "id": "filesystem",
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/user/allowed-directory"],
+      "enabled": true,
+      "lazyLoad": false,
+      "timeout": 60000,
+      "maxRetries": 3
+    },
+    {
+      "id": "github",
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      },
+      "enabled": true,
+      "lazyLoad": true,
+      "timeout": 30000,
+      "maxRetries": 3
+    },
+    {
+      "id": "brave_search",
+      "transport": "sse",
+      "url": "https://mcp.brave.com/sse",
+      "env": {
+        "HEADER_Authorization": "Bearer ${BRAVE_API_KEY}"
+      },
+      "enabled": false,
+      "lazyLoad": true,
+      "timeout": 30000,
+      "maxRetries": 2
+    },
+    {
+      "id": "memory",
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "enabled": true,
+      "lazyLoad": false,
+      "timeout": 60000,
+      "maxRetries": 3
+    },
+    {
+      "id": "postgres",
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres", "postgresql://user:password@localhost:5432/dbname"],
+      "enabled": false,
+      "lazyLoad": true,
+      "timeout": 120000,
+      "maxRetries": 3
+    }
+  ],
+  "settings": {
+    "requestTimeout": 60000,
+    "enableHealthChecks": true,
+    "healthCheckInterval": 30000,
+    "enableHotReload": true
+  }
+}
